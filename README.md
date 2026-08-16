@@ -1,61 +1,63 @@
-# MySQL 8.4 + phpMyAdmin Docker 環境
+# MySQL 8.4 + phpMyAdmin Docker Environment
 
-使用 Docker Compose 啟動 MySQL 8.4 與 phpMyAdmin。服務預設只綁定本機 `127.0.0.1`，資料儲存在 Docker named volume，重建容器不會遺失。
+[English](README.md) | [繁體中文](README.zh-TW.md)
 
-採用的映像版本集中設定於 `.env` 的 `MYSQL_IMAGE` 與 `PHPMYADMIN_IMAGE`；版本記錄與查詢方式請參閱 [VERSIONS.md](VERSIONS.md)。
+Run MySQL 8.4 and phpMyAdmin with Docker Compose. Services bind to `127.0.0.1` by default, and database files are persisted in a Docker named volume.
 
-## 快速開始
+Image versions are configured through `MYSQL_IMAGE` and `PHPMYADMIN_IMAGE` in `.env`. See [VERSIONS.md](VERSIONS.md) for version details and inspection commands.
 
-需求：Docker Desktop，或 Docker Engine 與 Docker Compose。
+## Quick Start
 
-1. 建立環境變數檔：
+Requirements: Docker Desktop, or Docker Engine with Docker Compose.
+
+1. Create your environment file:
 
    ```powershell
    Copy-Item .env.example .env
    ```
 
-   macOS / Linux 可使用 `cp .env.example .env`。
+   On macOS or Linux, use `cp .env.example .env`.
 
-2. 編輯 `.env`，至少替換 `MYSQL_ROOT_PASSWORD` 與 `MYSQL_PASSWORD` 為高強度密碼。
+2. Edit `.env` and replace at least `MYSQL_ROOT_PASSWORD` and `MYSQL_PASSWORD` with strong passwords.
 
-3. 啟動服務：
+3. Start the services:
 
    ```bash
    docker compose up -d
    ```
 
-4. 開啟 phpMyAdmin：<http://localhost:8080>
+4. Open phpMyAdmin at <http://localhost:8080>.
 
-一般帳號使用 `.env` 的 `MYSQL_USER` / `MYSQL_PASSWORD`；若需管理所有資料庫，可使用 `root` / `MYSQL_ROOT_PASSWORD`。伺服器名稱為 `mysql`，通常會自動帶入。
+Sign in with `MYSQL_USER` and `MYSQL_PASSWORD` from `.env`. To manage all databases, use `root` and `MYSQL_ROOT_PASSWORD`. The server name is `mysql` and is normally filled in automatically.
 
-## 連線資訊
+## Connection Details
 
-| 使用情境 | Host | Port |
+| Client | Host | Port |
 | --- | --- | --- |
-| 主機上的程式 | `127.0.0.1` | `MYSQL_PORT`，預設 `3306` |
-| 同一 Compose network 的容器 | `mysql` | `3306` |
-| phpMyAdmin | <http://localhost:8080> | `PMA_PORT`，預設 `8080` |
+| Application on the host | `127.0.0.1` | `MYSQL_PORT` (default: `3306`) |
+| Container on the same Compose network | `mysql` | `3306` |
+| phpMyAdmin | <http://localhost:8080> | `PMA_PORT` (default: `8080`) |
 
-連線字串範例：`mysql://myapp_user:你的密碼@127.0.0.1:3306/myapp`
+Example: `mysql://myapp_user:your_password@127.0.0.1:3306/myapp`
 
-## 常用指令
+## Common Commands
 
 ```bash
-docker compose ps              # 查看狀態
-docker compose logs -f         # 查看日誌
-docker compose down            # 停止並移除容器，保留資料
-docker compose restart         # 重新啟動
-docker compose pull            # 更新映像
-docker compose up -d           # 啟動或重建容器
+docker compose ps              # Show service status
+docker compose logs -f         # Follow logs
+docker compose down            # Remove containers and keep data
+docker compose restart         # Restart services
+docker compose pull            # Pull newer images
+docker compose up -d           # Start or recreate services
 ```
 
-## 初始化 SQL
+## Database Initialization
 
-將 `.sql`、`.sql.gz` 或可執行的 `.sh` 放進 `initdb/`，MySQL 只會在資料 volume **第一次建立**時依檔名順序執行，例如 `001-schema.sql`、`002-seed.sql`。
+Place `.sql`, `.sql.gz`, or executable `.sh` files in `initdb/`. MySQL runs them in filename order only when the data volume is initialized **for the first time**, for example `001-schema.sql` and `002-seed.sql`.
 
-既有 volume 不會再次執行初始化腳本。另請注意，修改 `.env` 的資料庫、帳號或密碼，也不會更新已初始化 volume 內的設定。
+Existing volumes do not rerun initialization scripts. Changing the database name, user, or passwords in `.env` also does not update an already initialized database.
 
-Compose 使用以下兩個 volume 掛載：
+Compose uses two volume mounts:
 
 ```yaml
 volumes:
@@ -65,19 +67,19 @@ volumes:
 
 ### `mysql84_data:/var/lib/mysql`
 
-- `mysql84_data` 是由 Docker 管理的 named volume。
-- `/var/lib/mysql` 是容器內 MySQL 儲存資料庫檔案的目錄。
-- 執行 `docker compose down` 或重建容器時，資料仍會保留。
-- 執行 `docker compose down -v` 才會連同 volume 及資料一起刪除。
+- `mysql84_data` is a Docker-managed named volume.
+- `/var/lib/mysql` is the MySQL data directory inside the container.
+- Data remains after `docker compose down` or container recreation.
+- `docker compose down -v` removes the volume and its data.
 
 ### `./initdb:/docker-entrypoint-initdb.d:ro`
 
-- `./initdb` 是本專案位於主機上的初始化腳本目錄。
-- `/docker-entrypoint-initdb.d` 是 MySQL 官方映像讀取初始化腳本的容器目錄。
-- `:ro` 表示唯讀（read-only），容器可以讀取腳本，但不能修改主機上的檔案。
-- 腳本只會在 `mysql84_data` 全新且資料庫尚未初始化時執行一次。
+- `./initdb` is the initialization directory on the host.
+- `/docker-entrypoint-initdb.d` is where the official MySQL image reads initialization scripts.
+- `:ro` mounts the directory as read-only, so the container cannot modify the host files.
+- Scripts run once, only when `mysql84_data` is new and uninitialized.
 
-例如：
+Example:
 
 ```text
 initdb/
@@ -85,11 +87,11 @@ initdb/
 └── 002-insert-data.sql
 ```
 
-如果不需要初始化腳本，可以從 `compose.yaml` 移除 `./initdb:/docker-entrypoint-initdb.d:ro`，不影響 MySQL 正常運行及資料保存。
+If initialization scripts are not needed, remove `./initdb:/docker-entrypoint-initdb.d:ro` from `compose.yaml`. MySQL and persistent storage will continue to work normally.
 
-## 備份與還原
+## Backup and Restore
 
-先從 `.env` 取得 root 密碼，再執行以下 PowerShell 指令：
+Read the root password from `.env` and create a backup with PowerShell:
 
 ```powershell
 $password = (Get-Content .env | Select-String '^MYSQL_ROOT_PASSWORD=').Line.Split('=',2)[1]
@@ -97,28 +99,28 @@ New-Item -ItemType Directory -Force backup | Out-Null
 docker compose exec -T mysql mysqldump -uroot -p"$password" --all-databases --single-transaction | Out-File -Encoding utf8 backup/all-databases.sql
 ```
 
-還原：
+Restore:
 
 ```powershell
 $password = (Get-Content .env | Select-String '^MYSQL_ROOT_PASSWORD=').Line.Split('=',2)[1]
 Get-Content -Raw backup/all-databases.sql | docker compose exec -T mysql mysql -uroot -p"$password"
 ```
 
-SQL dump 可能含敏感資料，請妥善保管。
+SQL dumps may contain sensitive data. Store them securely.
 
-## 清除全部資料
+## Remove All Data
 
-以下指令會刪除 MySQL volume，資料無法從此環境復原：
+The following command permanently removes the MySQL volume and its data:
 
 ```bash
 docker compose down -v
 ```
 
-再次啟動時會建立全新資料庫，並重新執行 `initdb/` 內容。
+The next startup creates a new database and reruns the files in `initdb/`.
 
-## 注意事項
+## Notes
 
-- `.env` 已被 `.gitignore` 排除，請勿提交密碼。
-- 升級映像時請修改 `.env` 的 `MYSQL_IMAGE` 或 `PHPMYADMIN_IMAGE`，更新 `VERSIONS.md`，並先完成資料庫備份。
-- 若 port 被占用，可修改 `.env` 的 `MYSQL_PORT` 或 `PMA_PORT`。
-- 如需讓其他電腦連線，須調整 `compose.yaml` 的 `127.0.0.1` 綁定，並搭配防火牆、TLS 與嚴格帳號權限；不建議直接公開到網際網路。
+- `.env` is excluded by `.gitignore`; never commit credentials.
+- Before upgrading, back up the database, update `MYSQL_IMAGE` or `PHPMYADMIN_IMAGE` in `.env`, and update `VERSIONS.md`.
+- If a port is already in use, change `MYSQL_PORT` or `PMA_PORT` in `.env`.
+- To allow remote connections, change the `127.0.0.1` bindings in `compose.yaml` and secure access with a firewall, TLS, and strict permissions. Do not expose MySQL or phpMyAdmin directly to the public internet.
