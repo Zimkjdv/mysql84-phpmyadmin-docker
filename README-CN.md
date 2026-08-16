@@ -1,6 +1,6 @@
 # MySQL 8.4 + phpMyAdmin Docker 環境
 
-[English](README.md) | [繁體中文](README.zh-TW.md)
+[English](README.md) | [繁體中文](README-CN.md)
 
 使用 Docker Compose 啟動 MySQL 8.4 與 phpMyAdmin。服務預設只綁定本機 `127.0.0.1`，資料儲存在 Docker named volume，重建容器不會遺失。
 

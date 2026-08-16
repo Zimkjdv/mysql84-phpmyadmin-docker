@@ -1,6 +1,6 @@
 # MySQL 8.4 + phpMyAdmin Docker Environment
 
-[English](README.md) | [繁體中文](README.zh-TW.md)
+[English](README.md) | [繁體中文](README-CN.md)
 
 Run MySQL 8.4 and phpMyAdmin with Docker Compose. Services bind to `127.0.0.1` by default, and database files are persisted in a Docker named volume.
 
