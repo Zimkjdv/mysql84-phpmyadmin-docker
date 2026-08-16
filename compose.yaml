@@ -1,0 +1,53 @@
+name: mysql84-phpmyadmin
+
+services:
+  mysql:
+    image: ${MYSQL_IMAGE:-mysql:8.4}
+    container_name: mysql84
+    restart: unless-stopped
+    environment:
+      TZ: ${TZ:-Asia/Taipei}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?請在 .env 設定 MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-myapp}
+      MYSQL_USER: ${MYSQL_USER:-myapp_user}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:?請在 .env 設定 MYSQL_PASSWORD}
+    ports:
+      - "127.0.0.1:${MYSQL_PORT:-3306}:3306"
+    volumes:
+      - mysql84_data:/var/lib/mysql
+      - ./initdb:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p\"$$MYSQL_ROOT_PASSWORD\" --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks:
+      - db_network
+
+  phpmyadmin:
+    image: ${PHPMYADMIN_IMAGE:-phpmyadmin:5.2-apache}
+    container_name: phpmyadmin
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      TZ: ${TZ:-Asia/Taipei}
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+      UPLOAD_LIMIT: ${PMA_UPLOAD_LIMIT:-128M}
+      MEMORY_LIMIT: ${PMA_MEMORY_LIMIT:-256M}
+    ports:
+      - "127.0.0.1:${PMA_PORT:-8080}:80"
+    networks:
+      - db_network
+
+volumes:
+  mysql84_data:
+    name: mysql84_data
+
+networks:
+  db_network:
+    name: mysql84_network
+    driver: bridge

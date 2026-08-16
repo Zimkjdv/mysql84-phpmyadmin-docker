@@ -1,0 +1,5 @@
+.env
+*.sql.gz
+backup/
+initdb/*
+!initdb/.gitkeep
