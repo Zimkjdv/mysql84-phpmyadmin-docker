@@ -2,7 +2,7 @@
 
 [English](README.md) | [繁體中文](README-CN.md)
 
-Run MySQL 8.4 and phpMyAdmin with Docker Compose. Services bind to `127.0.0.1` by default, and database files are persisted in a Docker named volume.
+Run MySQL 8.4 and phpMyAdmin with Docker Compose. MySQL binds to `127.0.0.1` by default, while phpMyAdmin is published on host port `8080`. Database files are persisted in a Docker named volume.
 
 Image versions are configured through `MYSQL_IMAGE` and `PHPMYADMIN_IMAGE` in `.env`. See [VERSIONS.md](VERSIONS.md) for version details and inspection commands.
 
@@ -30,13 +30,33 @@ Requirements: Docker Desktop, or Docker Engine with Docker Compose.
 
 Sign in with `MYSQL_USER` and `MYSQL_PASSWORD` from `.env`. To manage all databases, use `root` and `MYSQL_ROOT_PASSWORD`. The server name is `mysql` and is normally filled in automatically.
 
+## Optional Apache Reverse Proxy
+
+To let users open phpMyAdmin at `http://host-ip/` without entering `:8080`, optionally start `compose.apache-proxy.yaml`. It runs a separate Apache container on the host's port `80` and forwards requests to the existing phpMyAdmin container.
+
+Start the main services first so they create `mysql84_network`, then start the proxy:
+
+```powershell
+docker compose -f compose.yaml up -d
+docker compose -f compose.apache-proxy.yaml up -d
+```
+
+With the proxy enabled, use <http://localhost/> or <http://host-ip/>. To stop it, stop the proxy first and then the main services:
+
+```powershell
+docker compose -f compose.apache-proxy.yaml down
+docker compose -f compose.yaml down
+```
+
+Host port `80` must be available or the Apache proxy container cannot start. Direct mode remains available at <http://localhost:8080>.
+
 ## Connection Details
 
 | Client | Host | Port |
 | --- | --- | --- |
 | Application on the host | `127.0.0.1` | `MYSQL_PORT` (default: `3306`) |
 | Container on the same Compose network | `mysql` | `3306` |
-| phpMyAdmin | <http://localhost:8080> | `PMA_PORT` (default: `8080`) |
+| phpMyAdmin | <http://localhost:8080> (use the host IP from the LAN) | `PMA_PORT` (default: `8080`) |
 
 Example: `mysql://myapp_user:your_password@127.0.0.1:3306/myapp`
 
@@ -123,4 +143,5 @@ The next startup creates a new database and reruns the files in `initdb/`.
 - `.env` is excluded by `.gitignore`; never commit credentials.
 - Before upgrading, back up the database, update `MYSQL_IMAGE` or `PHPMYADMIN_IMAGE` in `.env`, and update `VERSIONS.md`.
 - If a port is already in use, change `MYSQL_PORT` or `PMA_PORT` in `.env`.
+- `compose.apache-proxy.yaml` is optional and must be started after the main Compose file because it joins the existing `mysql84_network`.
 - To allow remote connections, change the `127.0.0.1` bindings in `compose.yaml` and secure access with a firewall, TLS, and strict permissions. Do not expose MySQL or phpMyAdmin directly to the public internet.
