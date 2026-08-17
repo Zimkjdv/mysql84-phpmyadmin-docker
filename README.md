@@ -50,6 +50,26 @@ docker compose -f compose.yaml down
 
 Host port `80` must be available or the Apache proxy container cannot start. Direct mode remains available at <http://localhost:8080>.
 
+If the same host will proxy additional web applications, use the path-based proxy instead:
+
+```powershell
+docker compose -f compose.yaml up -d
+docker compose -f compose.apache-path-proxy.yaml up -d
+```
+
+With it enabled, use <http://localhost/phpmyadmin/> or <http://host-ip/phpmyadmin/>. Both `compose.apache-proxy.yaml` and `compose.apache-path-proxy.yaml` use host port `80`, so start only one of them.
+
+If redirects use the wrong path after login, set the full public URL in `.env`, for example `PMA_ABSOLUTE_URI=http://172.16.5.73/phpmyadmin/`, and recreate the phpMyAdmin container.
+
+If you expect to add more Python web or API services, you can use the Nginx path-based reverse proxy instead:
+
+```powershell
+docker compose -f compose.yaml up -d
+docker compose -f compose.nginx-path-proxy.yaml up -d
+```
+
+The Nginx configuration is in `nginx/path-proxy.conf`. It currently provides `/phpmyadmin/` and includes commented route examples for `/api/` and `/web/`. It uses host port `80`, so run only one of the Apache or Nginx proxy Compose files at a time.
+
 ## Connection Details
 
 | Client | Host | Port |

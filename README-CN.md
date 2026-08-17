@@ -46,6 +46,26 @@ docker compose -f compose.yaml down
 
 主機的 `80` Port 必須可用；若被其他程式占用，Apache 反向代理容器將無法啟動。直接模式仍可使用 <http://localhost:8080>。
 
+若同一個主機還要代理其他 Web 應用，可改用路徑型 Proxy：
+
+```powershell
+docker compose -f compose.yaml up -d
+docker compose -f compose.apache-path-proxy.yaml up -d
+```
+
+啟用後使用 <http://localhost/phpmyadmin/> 或 <http://主機IP/phpmyadmin/>。`compose.apache-proxy.yaml` 與 `compose.apache-path-proxy.yaml` 都會使用主機 `80`，請選擇其中一個啟動。
+
+若登入後跳轉路徑不正確，請在 `.env` 設定使用者實際存取的完整網址，例如 `PMA_ABSOLUTE_URI=http://172.16.5.73/phpmyadmin/`，再重建 phpMyAdmin 容器。
+
+若未來 Python Web/API 服務較多，也可改用 Nginx 路徑型反向代理：
+
+```powershell
+docker compose -f compose.yaml up -d
+docker compose -f compose.nginx-path-proxy.yaml up -d
+```
+
+Nginx 設定檔位於 `nginx/path-proxy.conf`，目前提供 `/phpmyadmin/`，並預留 `/api/` 與 `/web/` 的路由範例。它與兩個 Apache Proxy Compose 都會使用主機 `80`，請選擇其中一個 Proxy 啟動。
+
 ## 連線資訊
 
 | 使用情境 | Host | Port |
