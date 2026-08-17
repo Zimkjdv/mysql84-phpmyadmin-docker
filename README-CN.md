@@ -26,6 +26,34 @@
 
 一般帳號使用 `.env` 的 `MYSQL_USER` / `MYSQL_PASSWORD`；若需管理所有資料庫，可使用 `root` / `MYSQL_ROOT_PASSWORD`。伺服器名稱為 `mysql`。
 
+## Proxy 選擇指南
+
+先啟動主要服務：
+
+```powershell
+docker compose -f compose.yaml up -d
+```
+
+再依需求選擇以下其中一種 Proxy。三種 Proxy 都會占用主機 `80` Port，不能同時啟動：
+
+| Proxy | Compose 檔案 | 存取網址 | 適用情境 |
+| --- | --- | --- | --- |
+| Apache 根路徑 | `compose.apache-proxy.yaml` | `http://主機IP/` | 只有 phpMyAdmin，設定最簡單 |
+| Apache 路徑型 | `compose.apache-path-proxy.yaml` | `http://主機IP/phpmyadmin/` | 想使用 IP 分流多個網站 |
+| Nginx 路徑型 | `compose.nginx-path-proxy.yaml` | `http://主機IP/phpmyadmin/` | 未來 Python Web/API 服務較多 |
+
+例如啟用 Nginx：
+
+```powershell
+docker compose -f compose.nginx-path-proxy.yaml up -d
+```
+
+切換 Proxy 前，先停止目前使用中的 Proxy：
+
+```powershell
+docker compose -f compose.nginx-path-proxy.yaml down
+```
+
 ## 可選的 Apache 反向代理
 
 若希望使用者透過 `http://主機IP/` 存取 phpMyAdmin，而不必輸入 `:8080`，可額外啟動 `compose.apache-proxy.yaml`。這個檔案會啟動另一個 Apache 容器，監聽主機的 `80` Port，並將請求轉送至既有的 phpMyAdmin 容器。

@@ -30,6 +30,34 @@ Requirements: Docker Desktop, or Docker Engine with Docker Compose.
 
 Sign in with `MYSQL_USER` and `MYSQL_PASSWORD` from `.env`. To manage all databases, use `root` and `MYSQL_ROOT_PASSWORD`. The server name is `mysql` and is normally filled in automatically.
 
+## Proxy Selection Guide
+
+Start the main services first:
+
+```powershell
+docker compose -f compose.yaml up -d
+```
+
+Then choose one of the following proxy options. All three proxies use host port `80` and cannot run at the same time:
+
+| Proxy | Compose file | URL | Best for |
+| --- | --- | --- | --- |
+| Apache root path | `compose.apache-proxy.yaml` | `http://host-ip/` | phpMyAdmin only; simplest setup |
+| Apache path-based | `compose.apache-path-proxy.yaml` | `http://host-ip/phpmyadmin/` | Multiple sites routed by IP path |
+| Nginx path-based | `compose.nginx-path-proxy.yaml` | `http://host-ip/phpmyadmin/` | Multiple Python web/API services |
+
+For example, to enable Nginx:
+
+```powershell
+docker compose -f compose.nginx-path-proxy.yaml up -d
+```
+
+Stop the currently active proxy before switching:
+
+```powershell
+docker compose -f compose.nginx-path-proxy.yaml down
+```
+
 ## Optional Apache Reverse Proxy
 
 To let users open phpMyAdmin at `http://host-ip/` without entering `:8080`, optionally start `compose.apache-proxy.yaml`. It runs a separate Apache container on the host's port `80` and forwards requests to the existing phpMyAdmin container.
