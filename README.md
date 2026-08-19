@@ -52,6 +52,8 @@ For example, to enable Nginx:
 docker compose -f compose.nginx-path-proxy.yaml up -d
 ```
 
+On Windows, you can also run [`deploy-nginx-path-proxy.bat`](deploy-nginx-path-proxy.bat) to start the main services and Nginx proxy automatically.
+
 Stop the currently active proxy before switching:
 
 ```powershell

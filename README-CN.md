@@ -48,6 +48,8 @@ docker compose -f compose.yaml up -d
 docker compose -f compose.nginx-path-proxy.yaml up -d
 ```
 
+Windows 也可以直接執行 [`deploy-nginx-path-proxy.bat`](deploy-nginx-path-proxy.bat) 自動啟動主要服務與 Nginx Proxy。
+
 切換 Proxy 前，先停止目前使用中的 Proxy：
 
 ```powershell
