@@ -176,6 +176,8 @@ $password = (Get-Content .env | Select-String '^MYSQL_ROOT_PASSWORD=').Line.Spli
 Get-Content -Raw backup/all-databases.sql | docker compose exec -T mysql mysql -uroot -p"$password"
 ```
 
+On Windows, you can also run [`backup-mysql.bat`](backup-mysql.bat) to create the backup automatically. The backup uses a timestamped filename, such as `backup/all-databases-2026-08-20-10-26-28.sql`, so previous backups are not overwritten.
+
 SQL dumps may contain sensitive data. Store them securely.
 
 ## Remove All Data

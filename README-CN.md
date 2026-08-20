@@ -166,6 +166,8 @@ $password = (Get-Content .env | Select-String '^MYSQL_ROOT_PASSWORD=').Line.Spli
 Get-Content -Raw backup/all-databases.sql | docker compose exec -T mysql mysql -uroot -p"$password"
 ```
 
+Windows 也可以直接執行 [`backup-mysql.bat`](backup-mysql.bat) 自動建立備份。備份檔會以時間戳命名，例如 `backup/all-databases-2026-08-20-10-26-28.sql`，不會覆蓋之前的備份。
+
 SQL dump 可能包含敏感資料，請妥善保管。
 
 ## 清除全部資料
