@@ -3,17 +3,17 @@ setlocal
 
 cd /d "%~dp0"
 
-echo [1/5] Checking .env...
-if not exist ".env" (
-    echo ERROR: .env was not found.
-    echo Copy .env.example to .env and set the MySQL passwords first.
-    exit /b 1
-)
-
-echo [2/5] Checking Docker...
+echo [1/5] Checking Docker...
 docker info >nul 2>&1
 if errorlevel 1 (
     echo ERROR: Docker Desktop is not running or is not accessible.
+    exit /b 1
+)
+
+echo [2/5] Checking .env...
+if not exist ".env" (
+    echo ERROR: .env was not found.
+    echo Copy .env.example to .env and set the MySQL passwords first.
     exit /b 1
 )
 
