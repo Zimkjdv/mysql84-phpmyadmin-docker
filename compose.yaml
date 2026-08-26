@@ -7,10 +7,10 @@ services:
     restart: unless-stopped
     environment:
       TZ: ${TZ:-Asia/Taipei}
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?請在 .env 設定 MYSQL_ROOT_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?Set MYSQL_ROOT_PASSWORD in .env}
       MYSQL_DATABASE: ${MYSQL_DATABASE:-myapp}
       MYSQL_USER: ${MYSQL_USER:-myapp_user}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD:?請在 .env 設定 MYSQL_PASSWORD}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:?Set MYSQL_PASSWORD in .env}
     ports:
       - "127.0.0.1:${MYSQL_PORT:-3306}:3306"
     volumes:
