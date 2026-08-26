@@ -178,6 +178,14 @@ Get-Content -Raw backup/all-databases.sql | docker compose exec -T mysql mysql -
 
 On Windows, you can also run [`backup-mysql.bat`](backup-mysql.bat) to create the backup automatically. The backup uses a timestamped filename, such as `backup/all-databases-2026-08-20-10-26-28.sql`, so previous backups are not overwritten.
 
+To also copy backups to other locations, set `BACKUP_PATHS` in `.env`, separating multiple paths with semicolons:
+
+```env
+BACKUP_PATHS=D:\mysql-backups;\\server\share\mysql
+```
+
+The project `backup` directory is always kept. If `BACKUP_PATHS` is empty or missing, only the project backup is created. Relative paths are resolved from the project root.
+
 SQL dumps may contain sensitive data. Store them securely.
 
 ## Remove All Data

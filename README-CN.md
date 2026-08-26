@@ -168,6 +168,14 @@ Get-Content -Raw backup/all-databases.sql | docker compose exec -T mysql mysql -
 
 Windows 也可以直接執行 [`backup-mysql.bat`](backup-mysql.bat) 自動建立備份。備份檔會以時間戳命名，例如 `backup/all-databases-2026-08-20-10-26-28.sql`，不會覆蓋之前的備份。
 
+若要同時複製到其他位置，可在 `.env` 設定 `BACKUP_PATHS`，多個路徑以分號分隔：
+
+```env
+BACKUP_PATHS=D:\mysql-backups;\\server\share\mysql
+```
+
+根目錄的 `backup` 一定會保留；若 `BACKUP_PATHS` 留空或不存在，就只建立根目錄備份。相對路徑會以專案根目錄為基準。
+
 SQL dump 可能包含敏感資料，請妥善保管。
 
 ## 清除全部資料
