@@ -48,7 +48,7 @@ docker compose -f compose.yaml up -d
 docker compose -f compose.nginx-path-proxy.yaml up -d
 ```
 
-Windows 也可以直接執行 [`deploy-nginx-path-proxy.bat`](deploy-nginx-path-proxy.bat) 自動啟動主要服務與 Nginx Proxy。
+Windows 也可以直接執行 [`deploy-nginx-path-proxy.bat`](deploy-nginx-path-proxy.bat) 自動偵測區網 IP、更新 `.env` 的 `PMA_ABSOLUTE_URI`，再啟動主要服務與 Nginx Proxy。也可以單獨執行 [`update-pma-absolute-uri.bat`](update-pma-absolute-uri.bat) 更新網址。若找不到區網 IP，會改用 `http://localhost/phpmyadmin/` 並繼續部署。
 
 切換 Proxy 前，先停止目前使用中的 Proxy：
 

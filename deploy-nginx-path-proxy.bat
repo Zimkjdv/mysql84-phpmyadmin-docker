@@ -3,28 +3,35 @@ setlocal
 
 cd /d "%~dp0"
 
-echo [1/4] Checking .env...
+echo [1/5] Checking .env...
 if not exist ".env" (
     echo ERROR: .env was not found.
     echo Copy .env.example to .env and set the MySQL passwords first.
     exit /b 1
 )
 
-echo [2/4] Checking Docker...
+echo [2/5] Checking Docker...
 docker info >nul 2>&1
 if errorlevel 1 (
     echo ERROR: Docker Desktop is not running or is not accessible.
     exit /b 1
 )
 
-echo [3/4] Starting MySQL and phpMyAdmin...
+echo [3/5] Updating phpMyAdmin public URI...
+call "%~dp0update-pma-absolute-uri.bat"
+if errorlevel 1 (
+    echo ERROR: Failed to update PMA_ABSOLUTE_URI.
+    exit /b 1
+)
+
+echo [4/5] Starting MySQL and phpMyAdmin...
 docker compose -f compose.yaml up -d
 if errorlevel 1 (
     echo ERROR: Failed to start the main Compose services.
     exit /b 1
 )
 
-echo [4/4] Starting Nginx path-based reverse proxy...
+echo [5/5] Starting Nginx path-based reverse proxy...
 docker compose -f compose.nginx-path-proxy.yaml up -d
 if errorlevel 1 (
     echo ERROR: Failed to start the Nginx path proxy.

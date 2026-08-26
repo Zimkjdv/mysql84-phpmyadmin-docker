@@ -52,7 +52,7 @@ For example, to enable Nginx:
 docker compose -f compose.nginx-path-proxy.yaml up -d
 ```
 
-On Windows, you can also run [`deploy-nginx-path-proxy.bat`](deploy-nginx-path-proxy.bat) to start the main services and Nginx proxy automatically.
+On Windows, you can also run [`deploy-nginx-path-proxy.bat`](deploy-nginx-path-proxy.bat) to detect the LAN IP, update `PMA_ABSOLUTE_URI` in `.env`, and start the main services and Nginx proxy automatically. You can also run [`update-pma-absolute-uri.bat`](update-pma-absolute-uri.bat) separately to update the URL. If no LAN IP is detected, it falls back to `http://localhost/phpmyadmin/` and continues deployment.
 
 Stop the currently active proxy before switching:
 
