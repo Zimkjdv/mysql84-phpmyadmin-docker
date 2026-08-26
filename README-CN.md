@@ -85,7 +85,7 @@ docker compose -f compose.apache-path-proxy.yaml up -d
 
 啟用後使用 <http://localhost/phpmyadmin/> 或 <http://主機IP/phpmyadmin/>。`compose.apache-proxy.yaml` 與 `compose.apache-path-proxy.yaml` 都會使用主機 `80`，請選擇其中一個啟動。
 
-若登入後跳轉路徑不正確，請在 `.env` 設定使用者實際存取的完整網址，例如 `PMA_ABSOLUTE_URI=http://172.16.5.73/phpmyadmin/`，再重建 phpMyAdmin 容器。
+若登入後跳轉路徑不正確，請在 `.env` 設定使用者實際存取的完整網址，例如 `PMA_ABSOLUTE_URI=http://192.168.1.100/phpmyadmin/`，再重建 phpMyAdmin 容器。
 
 若未來 Python Web/API 服務較多，也可改用 Nginx 路徑型反向代理：
 
@@ -101,10 +101,35 @@ Nginx 設定檔位於 `nginx/path-proxy.conf`，目前提供 `/phpmyadmin/`，�
 | 使用情境 | Host | Port |
 | --- | --- | --- |
 | 主機上的程式 | `127.0.0.1` | `MYSQL_PORT`，預設 `3306` |
-| 同一 Compose network 的容器 | `mysql` | `3306` |
+| 同一 Compose network 的容器 | `mysql`（service name） | `3306` |
+| `mysql84_network` 上的外部 PHP 容器 | `mysql84` | `3306` |
 | phpMyAdmin | <http://localhost:8080>（區網使用主機 IP） | `PMA_PORT`，預設 `8080` |
 
 連線字串範例：`mysql://myapp_user:你的密碼@127.0.0.1:3306/myapp`
+
+### 開放 MySQL 給區網連線
+
+預設情況下，MySQL 只綁定本機：
+
+```yaml
+ports:
+  - "127.0.0.1:3306:3306"
+```
+
+如果要讓區網其他電腦連線，將它改成：
+
+```yaml
+ports:
+  - "0.0.0.0:3306:3306"
+```
+
+然後重新建立 MySQL 容器：
+
+```powershell
+docker compose up -d --force-recreate mysql
+```
+
+區網使用者可使用 Docker 主機的區網 IP 與 `3306` 連線，例如 `192.168.1.100:3306`。同時要在 Windows 防火牆允許輸入 TCP `3306`，並使用權限最小化的 MySQL 帳號。除非確實需要區網存取，否則建議維持 `127.0.0.1`；不要直接暴露到公用網際網路。
 
 ## 常用指令
 

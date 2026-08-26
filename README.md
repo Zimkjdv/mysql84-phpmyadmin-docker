@@ -89,7 +89,7 @@ docker compose -f compose.apache-path-proxy.yaml up -d
 
 With it enabled, use <http://localhost/phpmyadmin/> or <http://host-ip/phpmyadmin/>. Both `compose.apache-proxy.yaml` and `compose.apache-path-proxy.yaml` use host port `80`, so start only one of them.
 
-If redirects use the wrong path after login, set the full public URL in `.env`, for example `PMA_ABSOLUTE_URI=http://172.16.5.73/phpmyadmin/`, and recreate the phpMyAdmin container.
+If redirects use the wrong path after login, set the full public URL in `.env`, for example `PMA_ABSOLUTE_URI=http://192.168.1.100/phpmyadmin/`, and recreate the phpMyAdmin container.
 
 If you expect to add more Python web or API services, you can use the Nginx path-based reverse proxy instead:
 
@@ -105,10 +105,35 @@ The Nginx configuration is in `nginx/path-proxy.conf`. It currently provides `/p
 | Client | Host | Port |
 | --- | --- | --- |
 | Application on the host | `127.0.0.1` | `MYSQL_PORT` (default: `3306`) |
-| Container on the same Compose network | `mysql` | `3306` |
+| Container on the same Compose network | `mysql` (service name) | `3306` |
+| External PHP container on `mysql84_network` | `mysql84` | `3306` |
 | phpMyAdmin | <http://localhost:8080> (use the host IP from the LAN) | `PMA_PORT` (default: `8080`) |
 
 Example: `mysql://myapp_user:your_password@127.0.0.1:3306/myapp`
+
+### Allow MySQL connections from the LAN
+
+By default, MySQL is published only on the local host:
+
+```yaml
+ports:
+  - "127.0.0.1:3306:3306"
+```
+
+To allow other computers on the LAN to connect, change it to:
+
+```yaml
+ports:
+  - "0.0.0.0:3306:3306"
+```
+
+Then recreate the MySQL container:
+
+```powershell
+docker compose up -d --force-recreate mysql
+```
+
+LAN clients can connect using the Docker host's LAN IP and port `3306`, for example `192.168.1.100:3306`. Allow inbound TCP `3306` in Windows Firewall and use a least-privilege MySQL account. Keep MySQL restricted to `127.0.0.1` unless LAN access is required; never expose it directly to the public internet.
 
 ## Common Commands
 
